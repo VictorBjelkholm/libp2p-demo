@@ -163,8 +163,8 @@ class App extends React.Component {
     //   return <div key={peer}><small>{peer.substr(0, 16)}</small></div>
     // })
     return <div>
-      <div id='title'>lib<span id='blue'>p2p</span></div>
       <div id='graph' />
+      <div id='title'>lib<span id='blue'>p2p</span></div>
       <div id='you'>
         Your ID:<br />{this.state.myId}
       </div>

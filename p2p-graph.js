@@ -36,8 +36,8 @@ function TorrentGraph (root) {
       : Math.max(0.2, 1 - ((len - 10) / 100))
   }
 
-  var width = window.innerHeight
-  var height = window.innerWidth
+  var width = root.offsetWidth
+  var height = root.offsetHeight
 
   model.links.forEach(function (link) {
     var source = model.nodes[link.source]
@@ -154,8 +154,8 @@ function TorrentGraph (root) {
   }
 
   function refresh (e) {
-    width = window.innerWidth
-    height = window.innerWidth
+    width = root.offsetWidth
+    height = root.offsetHeight
 
     force
       .size([width, height])

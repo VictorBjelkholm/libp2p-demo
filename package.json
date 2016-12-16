@@ -19,6 +19,8 @@
   },
   "devDependencies": {},
   "scripts": {
+    "dev": "reactpack -d index.js",
+    "build": "reactpack index.js && ipfs add -r dist/ && rm -r dist/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
