@@ -7,7 +7,6 @@ const PeerId = require('peer-id')
 const Multiaddr = require('multiaddr')
 const Graph = require('./p2p-graph.js')
 const pullToStream = require('pull-stream-to-stream')
-require('bulma/css/bulma.css')
 require('./style.css')
 
 window.node = Node
@@ -163,9 +162,10 @@ class App extends React.Component {
     //   return <div key={peer}><small>{peer.substr(0, 16)}</small></div>
     // })
     return <div>
+      <div id='title'>lib<span id='blue'>p2p</span></div>
       <div id='graph' />
       <div id='you'>
-        You: {this.state.myId}
+        Your ID:<br />{this.state.myId}
       </div>
     </div>
   }

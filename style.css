@@ -1,20 +1,37 @@
-body {
-  background-color: rgba(0,0,0,0.5);
+html, body {
+  background-color: rgba(0,0,0,0.8);
+  font-family: Arial;
+}
+
+#title {
+  color: white;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  font-size: 28px;
+}
+
+#blue {
+  color: #63D0D3;
+}
+
+.text {
+  fill: white;
 }
 
 #you {
   position: absolute;
   top: 10px;
-  width: 100%;
+  width: 500px;
+  left: 50%;
+  margin-left: -250px;
   text-align: center;
+  color: rgba(240, 240, 240, 0.8);
+  word-break: break-all;
 }
 
 #graph {
   position: absolute;
   top: 0px; right: 0px; bottom: 0px; left: 0px;
   height: 100%;
-}
-
-.link {
-  stroke: rgb(0, 0, 0) !important;
 }
