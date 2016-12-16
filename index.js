@@ -20,8 +20,8 @@ const PEER_CONNECTED = 'PEER_CONNECTED'
 const PEER_DISCONNECTED = 'PEER_DISCONNECTED'
 
 const PROTOCOL = '/libp2p.io/0.0.1'
-// const SIGNAL_SERVER = '/libp2p-webrtc-star/ip4/178.62.241.75/tcp/9090/ws/ipfs/:peer-id'
-const SIGNAL_SERVER = '/libp2p-webrtc-star/ip4/127.0.0.1/tcp/9090/ws/ipfs/:peer-id'
+const SIGNAL_SERVER = '/libp2p-webrtc-star/ip4/178.62.241.75/tcp/9090/ws/ipfs/:peer-id'
+// const SIGNAL_SERVER = '/libp2p-webrtc-star/ip4/127.0.0.1/tcp/9090/ws/ipfs/:peer-id'
 
 const startOwnPeer = (callback) => {
   PeerId.create((err, peerId) => {
