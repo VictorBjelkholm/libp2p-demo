@@ -17,12 +17,13 @@ let HOME_ID = 'Starting...'
 let CONNECTED_IDS = {}
 
 const PROTOCOL = '/libp2p.io/0.0.1'
+const SIGNAL_SERVER = '/libp2p-webrtc-star/ip4/178.62.241.75/tcp/9090/ws/ipfs/:peer-id'
 
 const startOwnPeer = (callback) => {
   PeerId.create((err, peerId) => {
     if (err) callback(err)
     const peerInfo = new PeerInfo(peerId)
-    const mh1 = Multiaddr('/libp2p-webrtc-star/ip4/178.62.241.75/tcp/9090/ws/ipfs/' + peerId.toB58String())
+    const mh1 = Multiaddr(SIGNAL_SERVER.replace(':peer-id', peerId.toB58String()))
     peerInfo.multiaddr.add(mh1)
     const node = new Node(peerInfo)
     node.start((err) => {
