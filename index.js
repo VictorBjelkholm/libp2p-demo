@@ -5,7 +5,9 @@ const Node = require('libp2p-ipfs-browser').Node
 const PeerInfo = require('peer-info')
 const PeerId = require('peer-id')
 const Multiaddr = require('multiaddr')
-const Graph = require('p2p-graph')
+const Graph = require('./p2p-graph.js')
+const pullToStream = require('pull-stream-to-stream')
+require('bulma/css/bulma.css')
 require('./style.css')
 
 window.node = Node
@@ -37,6 +39,9 @@ const listenAndConnectToPeers = (node, callback) => {
   node.swarm.on('peer-mux-established', (peerInfo) => {
     callback(peerInfo)
   })
+  node.swarm.on('peer-mux-closed', (peerInfo) => {
+
+  })
 }
 
 class App extends React.Component {
@@ -56,6 +61,7 @@ class App extends React.Component {
     startOwnPeer((err, node) => {
       if (err) throw err
       const myId = node.peerInfo.id.toB58String()
+      window.node = node
       this.setState({node, myId})
       listenAndConnectToPeers(node, (peerInfo) => {
         console.log('Connected to one more peer!')
@@ -63,15 +69,25 @@ class App extends React.Component {
         const id = peerInfo.id.toB58String()
         graph.add({
           id: id,
-          name: id.substr(0, 16)
+          name: id
         })
+        graph.connect(myId, id)
 
         this.setState({peers: this.state.peers.concat([id])})
 
         node.dialByPeerInfo(peerInfo, PROTOCOL, (err, conn) => {
           if (!err) {
-            console.log('Made connection!')
+            console.log('Create connection over protocol!')
             console.log(conn)
+            const connStream = pullToStream(conn)
+            const value = JSON.stringify({
+              from: myId,
+              peers: node.peerBook.getAll()
+            })
+            window.connStream = connStream
+            connStream.write(new Buffer(value))
+            setImmediate(() => connStream.end())
+            console.log(connStream)
           }
         })
       })
@@ -82,8 +98,33 @@ class App extends React.Component {
       })
 
       node.handle(PROTOCOL, (protocol, conn) => {
-        console.log('Got connection!')
+        console.log('Got connection over protocol!')
         console.log(protocol, conn)
+        const connStream = pullToStream(conn)
+        const peerCollection = []
+        connStream.on('data', (data) => {
+          peerCollection.push(data.toString())
+          console.log('got data')
+        })
+        connStream.on('end', () => {
+          console.log('full')
+          const fullCollection = JSON.parse(peerCollection.join(''))
+          const fromId = fullCollection.from
+          const connectedPeers = Object.keys(fullCollection.peers).filter((id) => {
+            console.log(id)
+            return myId !== id
+          })
+          console.log(connectedPeers)
+          connectedPeers.forEach((id) => {
+            console.log('connect', fromId, 'and', id)
+            try {
+              this.state.graph.connect(fromId, id)
+            } catch (err) {
+              // err
+            }
+          })
+          window.remotePeers = fullCollection
+        })
         // pull(
         //   p,
         //   conn
@@ -115,19 +156,17 @@ class App extends React.Component {
     //   name: 'Another Peer'
     // })
 
-    // graph.connect('peer1', 'peer2')
     // graph.connect('peer2', 'peer3')
   }
   render () {
-    const peers = this.state.peers.map((peer) => {
-      return <div key={peer}><small>{peer.substr(0, 16)}</small></div>
-    })
+    // const peers = this.state.peers.map((peer) => {
+    //   return <div key={peer}><small>{peer.substr(0, 16)}</small></div>
+    // })
     return <div>
-      <div>
-        {this.state.myId.substr(0, 16)}
-      </div>
-      {peers}
       <div id='graph' />
+      <div id='you'>
+        You: {this.state.myId}
+      </div>
     </div>
   }
 }

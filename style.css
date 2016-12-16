@@ -1,3 +1,20 @@
 body {
   background-color: rgba(0,0,0,0.5);
 }
+
+#you {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+#graph {
+  position: absolute;
+  top: 0px; right: 0px; bottom: 0px; left: 0px;
+  height: 100%;
+}
+
+.link {
+  stroke: rgb(0, 0, 0) !important;
+}
