@@ -46,7 +46,10 @@ const listenAndConnectToPeers = (node, callback) => {
   node.swarm.on('peer-mux-closed', (peerInfo) => {
     callback(PEER_DISCONNECTED, peerInfo)
   })
+  // on error, disconnect
 }
+
+const REMOVED_PEERS = []
 
 class App extends React.Component {
   constructor (props) {
@@ -68,38 +71,51 @@ class App extends React.Component {
       window.node = node
       this.setState({node, myId})
       listenAndConnectToPeers(node, (type, peerInfo) => {
-        if (type === PEER_CONNECTED) {
-          const id = peerInfo.id.toB58String()
-          graph.add({
-            id: id,
-            name: id
-          })
-          graph.connect(myId, id)
+        const id = peerInfo.id.toB58String()
+        if (type === PEER_CONNECTED && REMOVED_PEERS.indexOf(id) === -1 && this.state.peers.indexOf(id) === -1) {
+          try {
+            graph.add({
+              id: id,
+              name: id
+            })
+            graph.connect(myId, id)
+          } catch (err) {
+            // err
+          }
 
           this.setState({peers: this.state.peers.concat([id])})
 
-          setTimeout(() => {
-            graph.choke(id)
-          }, 2000)
+          ;(function connectPeer () {
+            node.dialByPeerInfo(peerInfo, PROTOCOL, (err, conn) => {
+              if (!err) {
+                try {
+                  graph.indicateConnect(myId, id)
+                } catch (err) {
+                  // err
+                }
+                const connStream = pullToStream(conn)
+                const value = JSON.stringify({
+                  from: myId,
+                  peers: node.peerBook.getAll()
+                })
+                connStream.write(new Buffer(value))
+                setImmediate(() => connStream.end())
+              }
+            })
 
-          node.dialByPeerInfo(peerInfo, PROTOCOL, (err, conn) => {
-            if (!err) {
-              const connStream = pullToStream(conn)
-              const value = JSON.stringify({
-                from: myId,
-                peers: node.peerBook.getAll()
-              })
-              window.connStream = connStream
-              connStream.write(new Buffer(value))
-              setImmediate(() => connStream.end())
-            }
-          })
+            setTimeout(connectPeer, 5000)
+          })()
           return
         }
         if (type === PEER_DISCONNECTED) {
-          const id = peerInfo.id.toB58String()
-          graph.disconnectAll(id)
-          graph.remove(id)
+          node.peerBook.removeByB58String(id)
+          REMOVED_PEERS.push(id)
+          try {
+            graph.disconnectAll(id)
+            graph.remove(id)
+          } catch (err) {
+            // err
+          }
         }
       })
       graph.add({

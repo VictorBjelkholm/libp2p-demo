@@ -98,9 +98,6 @@ function TorrentGraph (root) {
 
     g.append('circle')
       .on('mouseover', function (d) {
-        d3.select(this)
-          .style('fill', COLORS.nodes.hover)
-
         d3.selectAll(childNodes(d))
           .style('fill', COLORS.nodes.hover)
           .style('stroke', COLORS.nodes.method)
@@ -273,8 +270,24 @@ function TorrentGraph (root) {
     update()
   }
 
-  function unchoke (sourceId, targetId) {
-    debug('unchoke %s %s', sourceId, targetId)
+  function indicateConnect (sourceId, targetId) {
+    var sourceNode = getNode(sourceId)
+    if (!sourceNode) throw new Error('connect: invalid source id')
+    var targetNode = getNode(targetId)
+    if (!targetNode) throw new Error('connect: invalid target id')
+    var index = getLinkIndex(sourceNode.index, targetNode.index)
+    if (index === -1) throw new Error('disconnect: connection does not exist')
+    const link = model.links[index]
+    targetNode.seeder = true
+    update()
+    setTimeout(() => {
+      targetNode.seeder = false
+      update()
+    }, 500)
+
+    window.sourceNode = sourceNode
+    window.targetNode = targetNode
+    window.link = link
   }
 
   function choke (sourceId, targetId) {
@@ -290,7 +303,7 @@ function TorrentGraph (root) {
     connect: connect,
     disconnect: disconnect,
     disconnectAll: disconnectAll,
-    unchoke: unchoke,
+    indicateConnect: indicateConnect,
     choke: choke
   }
 }
