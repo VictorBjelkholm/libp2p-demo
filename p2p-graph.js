@@ -264,6 +264,15 @@ function TorrentGraph (root) {
     update()
   }
 
+  function disconnectAll (sourceId) {
+    var sourceNode = getNode(sourceId)
+    if (!sourceNode) throw new Error('connect: invalid source id')
+    model.links = model.links.filter((link) => {
+      return link.source.id !== sourceId && link.target.id !== sourceId
+    })
+    update()
+  }
+
   function unchoke (sourceId, targetId) {
     debug('unchoke %s %s', sourceId, targetId)
   }
@@ -280,6 +289,7 @@ function TorrentGraph (root) {
     remove: remove,
     connect: connect,
     disconnect: disconnect,
+    disconnectAll: disconnectAll,
     unchoke: unchoke,
     choke: choke
   }
