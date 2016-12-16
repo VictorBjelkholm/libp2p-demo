@@ -5,17 +5,18 @@ var debug = require('debug')('p2p-graph')
 var debounce = require('debounce')
 
 var COLORS = {
-  links: '#FAFAFA',
   text: {
     subtitle: '#FAFAFA'
   },
   nodes: {
     method: function (d, i) {
-      return d.me
-        ? d3.hsl(210, 0.7, 0.725) // blue
-        : d.seeder
-          ? d3.hsl(120, 0.7, 0.725) // green
-          : d3.hsl(55, 0.7, 0.725) // yellow
+      if (d.target_connect || d.source_connect) {
+        return d3.hsl(120, 0.7, 0.725)
+      }
+      if (d.me) {
+        return d3.hsl(210, 0.7, 0.725)
+      }
+      return d3.hsl(55, 0.7, 0.725)
     },
     hover: '#FAFAFA',
     dep: '#252929'
@@ -84,8 +85,15 @@ function TorrentGraph (root) {
     link.enter()
       .insert('line', '.node')
         .attr('class', 'link')
-        .style('stroke', COLORS.links)
         .style('opacity', 0.5)
+
+    link.style('stroke', function (d) {
+      if (d.sending) {
+        return d3.hsl(120, 0.7, 0.725)
+      } else {
+        return 'white'
+      }
+    }).style('stroke-width', 2)
 
     link.exit()
       .remove()
@@ -123,7 +131,7 @@ function TorrentGraph (root) {
 
     node.select('circle')
       .attr('r', function (d) {
-        return scale() * (d.me ? 15 : 10)
+        return scale() * 10
       })
       .style('fill', COLORS.nodes.method)
 
@@ -245,7 +253,7 @@ function TorrentGraph (root) {
     if (getLink(sourceNode.index, targetNode.index)) {
       throw new Error('connect: cannot make duplicate connection')
     }
-    model.links.push({ source: sourceNode.index, target: targetNode.index })
+    model.links.push({ source: sourceNode.index, target: targetNode.index, sending: false })
     update()
   }
 
@@ -275,13 +283,16 @@ function TorrentGraph (root) {
     if (!sourceNode) throw new Error('connect: invalid source id')
     var targetNode = getNode(targetId)
     if (!targetNode) throw new Error('connect: invalid target id')
-    var index = getLinkIndex(sourceNode.index, targetNode.index)
-    if (index === -1) throw new Error('disconnect: connection does not exist')
-    const link = model.links[index]
-    targetNode.seeder = true
+    var link = getLink(sourceNode.index, targetNode.index)
+    if (!link) throw new Error('disconnect: connection does not exist')
+    targetNode.target_connect = true
+    sourceNode.source_connect = true
+    link.sending = true
     update()
     setTimeout(() => {
-      targetNode.seeder = false
+      link.sending = false
+      targetNode.target_connect = false
+      sourceNode.source_connect = false
       update()
     }, 500)
 
