@@ -294,11 +294,7 @@ function TorrentGraph (root) {
       targetNode.target_connect = false
       sourceNode.source_connect = false
       update()
-    }, 500)
-
-    window.sourceNode = sourceNode
-    window.targetNode = targetNode
-    window.link = link
+    }, 250)
   }
 
   function choke (sourceId, targetId) {

@@ -10,6 +10,14 @@ html, body {
   top: 10px;
   font-size: 28px;
 }
+#peers {
+  color: white;
+  position: absolute;
+  left: 10px;
+  top: 70px;
+  font-size: 13px;
+  opacity: 0.5;
+}
 
 #blue {
   color: #63D0D3;
