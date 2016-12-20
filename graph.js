@@ -45,6 +45,12 @@ const listenAndConnectToPeers = (node, callback) => {
 
 const REMOVED_PEERS = []
 
+let MY_COUNTRY = 'Unknown'
+// Lets hope this finishes before we tell other peers about it
+window.fetch('https://ipinfo.io/json').then((text) => text.json()).then((info) => {
+  MY_COUNTRY = info.country
+})
+
 export default class Graph extends React.Component {
   constructor (props) {
     super(props)
@@ -66,7 +72,7 @@ export default class Graph extends React.Component {
         const id = peerInfo.id.toB58String()
         if (type === PEER_CONNECTED && REMOVED_PEERS.indexOf(id) === -1 && this.state.peers.indexOf(id) === -1) {
           try {
-            graph.add({id})
+            graph.add({id, name: 'U'})
             graph.connect(myId, id)
           } catch (err) {
             // err
@@ -85,7 +91,8 @@ export default class Graph extends React.Component {
                 const connStream = pullToStream(conn)
                 const value = JSON.stringify({
                   from: myId,
-                  peers: node.peerBook.getAll()
+                  peers: node.peerBook.getAll(),
+                  country: MY_COUNTRY
                 })
                 connStream.write(new Buffer(value))
                 setImmediate(() => connStream.end())
@@ -122,6 +129,7 @@ export default class Graph extends React.Component {
         connStream.on('end', () => {
           const fullCollection = JSON.parse(peerCollection.join(''))
           const fromId = fullCollection.from
+          graph.setNodeName(fromId, fullCollection.country)
           try {
             graph.indicateConnect(myId, fromId)
           } catch (err) {

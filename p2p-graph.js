@@ -85,7 +85,7 @@ function TorrentGraph (root) {
     link.enter()
       .insert('line', '.node')
         .attr('class', 'link')
-        .style('opacity', 0.5)
+        .style('opacity', 0.2)
 
     link.style('stroke', function (d) {
       if (d.sending) {
@@ -93,7 +93,7 @@ function TorrentGraph (root) {
       } else {
         return d3.hsl(184, 0.52, 0.62)
       }
-    }).style('stroke-width', 2)
+    }).style('stroke-width', 3)
 
     link.exit()
       .remove()
@@ -134,12 +134,19 @@ function TorrentGraph (root) {
         return scale() * 10
       })
       .style('fill', COLORS.nodes.method)
+      .style('stroke', 'white')
+      .style('stroke-width', 1)
 
     g.append('text')
       .attr('class', 'text')
-      .text(function (d) { return d.name })
+      .text(function (d) {
+        return d.name
+      })
 
     node.select('text')
+      .text(function (d) {
+        return d.name
+      })
       .attr('font-size', function (d) {
         return d.me ? 16 * scale() : 12 * scale()
       })
@@ -156,8 +163,8 @@ function TorrentGraph (root) {
       .remove()
 
     force
-      .linkDistance(100 * scale())
-      .charge(-1000 * scale())
+      .linkDistance(500 * scale())
+      .charge(-500 * scale())
       .linkStrength(0.01)
       .start()
   }
@@ -301,6 +308,13 @@ function TorrentGraph (root) {
     }, 250)
   }
 
+  function setNodeName (id, name) {
+    var sourceNode = getNode(id)
+    if (!sourceNode) throw new Error('setNodeName: invalid id')
+    sourceNode.name = name
+    update()
+  }
+
   function choke (sourceId, targetId) {
     debug('choke %s %s', sourceId, targetId)
   }
@@ -315,6 +329,7 @@ function TorrentGraph (root) {
     disconnect: disconnect,
     disconnectAll: disconnectAll,
     indicateConnect: indicateConnect,
-    choke: choke
+    choke: choke,
+    setNodeName
   }
 }
