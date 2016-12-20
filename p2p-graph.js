@@ -14,12 +14,12 @@ var COLORS = {
         return d3.hsl(120, 0.7, 0.725)
       }
       if (d.me) {
-        return d3.hsl(210, 0.7, 0.725)
+        return d3.hsl(32, 0.91, 0.55)
       }
-      return d3.hsl(55, 0.7, 0.725)
+      return d3.hsl(184, 0.52, 0.62)
     },
-    hover: '#FAFAFA',
-    dep: '#252929'
+    hover: '#000',
+    dep: '#000'
   }
 }
 
@@ -91,7 +91,7 @@ function TorrentGraph (root) {
       if (d.sending) {
         return d3.hsl(120, 0.7, 0.725)
       } else {
-        return 'white'
+        return d3.hsl(184, 0.52, 0.62)
       }
     }).style('stroke-width', 2)
 
@@ -143,9 +143,13 @@ function TorrentGraph (root) {
       .attr('font-size', function (d) {
         return d.me ? 16 * scale() : 12 * scale()
       })
-      .attr('dx', 0)
+      .style('fill', () => {
+        return d3.hsl(32, 0.91, 0.55)
+      })
+      .attr('dx', -11)
       .attr('dy', function (d) {
-        return d.me ? -22 * scale() : -15 * scale()
+        return -22 * scale()
+        // return d.me ? -22 * scale() : -15 * scale()
       })
 
     node.exit()

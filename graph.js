@@ -66,10 +66,7 @@ export default class Graph extends React.Component {
         const id = peerInfo.id.toB58String()
         if (type === PEER_CONNECTED && REMOVED_PEERS.indexOf(id) === -1 && this.state.peers.indexOf(id) === -1) {
           try {
-            graph.add({
-              id: id,
-              name: id
-            })
+            graph.add({id})
             graph.connect(myId, id)
           } catch (err) {
             // err
